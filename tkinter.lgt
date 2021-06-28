@@ -38,7 +38,7 @@
 	do_query(Input, VariableNames, Response) :-
 		write_term_to_atom(Input, Query, [variable_names(VariableNames)]),
 		{Input},
-		ground_pairs_keys(VariableNames, Variables, Names),
+		ground_pairs_keys(VariableNames, VariableNames, Variables, Names),
 		as_dictionary(Variables, Unifications),
 		as_dictionary([
 			variable_names-Names,
@@ -57,23 +57,24 @@
 		as_dictionary([status-fail, query-Query], Dict),
 		json_response(Dict).
 
-	json_response(Resp) :-
-		as_curly_bracketed(Resp, JSON),
+	json_response(Response) :-
+		as_curly_bracketed(Response, JSON),
 		generate(stream(user_output), JSON),
 		nl(user_output),
 		flush_output.
 
 	% In one pass filter any non-ground values, convert from `=` pairs to `-`
 	% pairs, and accumulate the pairs keys
-	ground_pairs_keys(Pairs, Ground, Keys) :-
-		ground_pairs_keys(Pairs, H-H, Ground, I-I, Keys).
+	ground_pairs_keys(Pairs, VariableNames, Ground, Keys) :-
+		ground_pairs_keys(Pairs, VariableNames, H-H, Ground, I-I, Keys), !.
 
-	ground_pairs_keys([], Ground-[], Ground, Keys-[], Keys).
-	ground_pairs_keys([K=V|Pairs], GAcc-GH, Ground, KAcc-KH, Keys) :-
+	ground_pairs_keys([], _, Ground-[], Ground, Keys-[], Keys).
+	ground_pairs_keys([K=V|Pairs], VariableNames, GAcc-GH, Ground, KAcc-KH, Keys) :-
 		(	nonvar(V)
-		->	GH = [K-V|NGH], KH = [K|NKH]
+		->	write_term_to_atom(V, VA, [variable_names(VariableNames)]),
+			GH = [K-VA|NGH], KH = [K|NKH]
 		;	GH = NGH, KH = NKH
 		),
-		ground_pairs_keys(Pairs, GAcc-NGH, Ground, KAcc-NKH, Keys).
+		ground_pairs_keys(Pairs, VariableNames, GAcc-NGH, Ground, KAcc-NKH, Keys).
 
 :- end_object.
