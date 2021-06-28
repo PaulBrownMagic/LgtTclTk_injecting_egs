@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+wish examples_browser.tcl
