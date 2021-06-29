@@ -56,7 +56,7 @@ proc lgt_select {} {
 
 proc lgt_connect {} {
 	puts "Logtalk Connect"
-	lgt::connect_to "$::dirname/loader.lgt"
+	lgt::connect_to "'$::dirname/loader.lgt'"
 	.mbar.lgt entryconfigure 2 -state disabled
 	.mbar.lgt entryconfigure 3 -state normal
 	set ::status "Connected to $::dirname"

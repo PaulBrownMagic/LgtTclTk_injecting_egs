@@ -21,7 +21,9 @@ proc connect_to {loader} {
 	# Open as file
 	set lgt::logtalk [open "|$lgt::load_cmd" w+]
 	# Load loader
-	puts $lgt::logtalk "logtalk_load(\['$lgt::install_dir/loader.lgt', '$loader'\]), tkinter::go."
+	set to_load "logtalk_load(\['$lgt::install_dir/loader.lgt', $loader\]), tkinter::go."
+	puts $to_load
+	puts $lgt::logtalk $to_load
 	flush $lgt::logtalk
 	discard_to_ready
 	# Log connected
@@ -32,7 +34,7 @@ proc discard_to_ready {} {
 	set line ""
 	while {$line != "LOGTALK READY"} {
 		gets $lgt::logtalk line
-		# puts $line
+		puts $line
 	}
 }
 
